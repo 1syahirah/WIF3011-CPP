@@ -1,30 +1,24 @@
-import java.util.Scanner;
+//1.	Write a Java program that sequentially finds the largest number in 
+// an array of integers with 1,000,000 elements filled with randomly generated
+//  numbers in the range of 1 to 50,000.
 
-public class Main extends Thread {
+
+import java.util.Random;
+
+public class Main  {
     public static void main(String[] args) throws Exception {
-        //Scanner myObj = new Scanner(System.in);
+         Random rd = new Random();
 
-        // System.out.print("Enter character:");
-        // String letter = myObj.nextLine();
+         int[] arr = rd.ints(1000000,1,50001).toArray();
         
-        // System.out.print("Enter a number:");
-        // int time = myObj.nextInt();
+         int largest = arr[0];
+         
+        for(int i = 0; i<arr.length; i++){
+            if(arr[i] > largest){
+                largest = arr[i];
+            }
+        }
 
-        // PrintChar q1 = new PrintChar("A", 5);
-        // PrintNum q2 = new PrintNum(10);
-
-        Control control = new Control();
-        Thread t1 = new Thread(new PrintChar("A", 5,1, control));
-        Thread t3 = new Thread(new PrintNum(20,2,control));
-        Thread t2 = new Thread(new PrintChar("B", 5,3,control));
-
-        t1.start();
-        t2.start();
-        t3.start();
-
-
-        //they run these first baru threads?
-        // q1.printChar("A", 2);
-        // q2.printNum(5); 
+         System.out.println("largest num: " + largest);
     }
 }
