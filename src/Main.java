@@ -1,29 +1,20 @@
 
 public class Main  {
     public static void main(String[] args) throws Exception {
-         RoomSemaphore room = new RoomSemaphore();
+         BankAccountSync account = new BankAccountSync();
 
-        // Thread for a Cleaner
-        Thread cleaner = new Thread(() -> {
-            try {
-                room.enterCleaner("Cleaner_1");
-                Thread.sleep(2000); // Simulating cleaning time
-                room.exitCleaner("Cleaner_1");
-            } catch (InterruptedException e) { e.printStackTrace(); }
-        });
+        // Creating multiple threads to perform concurrent deposits/withdrawals [cite: 232]
+        Runnable task = () -> {
+            for (int i = 0; i < 2; i++) {
+                account.deposit(50);
+                account.withdraw(30);
+            }
+        };
 
-        // Threads for Guests
-        for (int i = 1; i <= 8; i++) {
-            String name = "Guest_" + i;
-            new Thread(() -> {
-                try {
-                    room.enterGuest(name);
-                    Thread.sleep(1000); // Simulating stay time
-                    room.exitGuest(name);
-                } catch (InterruptedException e) { e.printStackTrace(); }
-            }).start();
-        }
+        Thread t1 = new Thread(task, "User_A");
+        Thread t2 = new Thread(task, "User_B");
 
-        cleaner.start();
+        t1.start();
+        t2.start();
     }
 }
