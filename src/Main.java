@@ -1,8 +1,3 @@
-//1.	Write a Java program that sequentially finds the largest number in 
-// an array of integers with 1,000,000 elements filled with randomly generated
-//  numbers in the range of 1 to 50,000.
-//2. Repeat the above program but using two threads to concurrently find the largest number.
-
 
 import java.util.Random;
 
@@ -12,21 +7,33 @@ public class Main  {
 
          int[] arr = rd.ints(1000000,1,50001).toArray();
         
-        int mid = arr.length/2;
+       // int mid = arr.length/2;
 
-        FindMax task1 = new FindMax(arr, 0, mid);
-        FindMax task2 = new FindMax(arr, mid, arr.length);
+        FindMax task1 = new FindMax(arr, 0, 250000);
+        FindMax task2 = new FindMax(arr, 250000, 500000);
+        FindMax task3 = new FindMax(arr, 500000, 750000);
+        FindMax task4 = new FindMax(arr, 750000, arr.length);
+
 
          Thread t1 = new Thread(task1);
          Thread t2 = new Thread(task2);
+         Thread t3 = new Thread(task3);
+         Thread t4 = new Thread(task4);
 
          t1.start();
          t2.start();
+         t3.start();
+         t4.start();
 
         t1.join();
         t2.join();
+        t3.join();
+        t4.join();
 
-        int largest = Math.max(task1.getLocalMax(), task2.getLocalMax());
+        int largest1 = Math.max(task1.getLocalMax(), task2.getLocalMax());
+        int largest2 = Math.max(task3.getLocalMax(), task4.getLocalMax());
+        int largest = Math.max(largest1, largest2);
+
 
         System.out.println("Largest number: " + largest);
     }
