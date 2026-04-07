@@ -1,20 +1,12 @@
 
 public class Main  {
     public static void main(String[] args) throws Exception {
-         BankAccountSync account = new BankAccountSync();
+       Node<Integer> node = new Node<>();
 
-        // Creating multiple threads to perform concurrent deposits/withdrawals [cite: 232]
-        Runnable task = () -> {
-            for (int i = 0; i < 2; i++) {
-                account.deposit(50);
-                account.withdraw(30);
-            }
-        };
+        Thread writer = new Thread(new Write(node));
+        Thread operator = new Thread(new Operate(node, 3, new Dummy())); // target = 3
 
-        Thread t1 = new Thread(task, "User_A");
-        Thread t2 = new Thread(task, "User_B");
-
-        t1.start();
-        t2.start();
+        writer.start();
+        operator.start();
     }
 }
