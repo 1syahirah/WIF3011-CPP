@@ -4,10 +4,12 @@ public class Operate implements Runnable {
     private Runnable task;
     private int count = 0;
 
+
     public Operate(Node<Integer> node, Integer target, Runnable task) {
         this.node = node;
         this.target = target;
         this.task = task;
+
     }
 
     @Override
@@ -16,8 +18,9 @@ public class Operate implements Runnable {
             node.executeOnValue(target, task);
             count++;
         }
-
+         
+         
         System.out.println("Task executed twice. Program terminating.");
-        System.exit(0); // stop program after 2 executions
+        System.exit(0); // Terminate the program
     }
 }

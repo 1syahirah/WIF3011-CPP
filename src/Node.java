@@ -26,17 +26,27 @@ public class Node<T> {
 
     // Execute task when desired value is found
     public void executeOnValue(T desiredValue, Runnable task) {
-        lock.lock();
-        try {
-            while (!desiredValue.equals(value)) {
-                valueChanged.await(); // wait until value changes
-            }
-            task.run(); // execute when condition is met
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } finally {
-            lock.unlock();
+    lock.lock();
+    try {
+        // Wait until value == desiredValue
+        while (!desiredValue.equals(value)) {
+            valueChanged.await();
         }
+
+        // Execute task
+        task.run();
+
+        // 🚨 IMPORTANT: wait until value changes away
+        while (desiredValue.equals(value)) {
+            valueChanged.await();
+            
+        }
+
+    } catch (InterruptedException e) {
+        e.printStackTrace();
+    } finally {
+        lock.unlock();
     }
+}
     
 }

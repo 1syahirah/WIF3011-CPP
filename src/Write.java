@@ -1,6 +1,7 @@
 import java.util.Random;
 
 public class Write implements Runnable {
+
     private Node<Integer> node;
     private Random rand = new Random();
 

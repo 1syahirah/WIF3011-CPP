@@ -4,7 +4,7 @@ public class Main  {
        Node<Integer> node = new Node<>();
 
         Thread writer = new Thread(new Write(node));
-        Thread operator = new Thread(new Operate(node, 3, new Dummy())); // target = 3
+        Thread operator = new Thread(new Operate(node, 2, new Dummy())); 
 
         writer.start();
         operator.start();
