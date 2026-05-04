@@ -1,7 +1,7 @@
 public class BankAccountSync {
     private double balance = 0;
 
-    // Control mechanism to ensure balance is always correct [cite: 233]
+    // Control mechanism to ensure balance is always correct
     public synchronized void deposit(double amount) {
         balance += amount; 
         System.out.println(Thread.currentThread().getName() + " deposited " + amount + ". New Balance: " + balance);
