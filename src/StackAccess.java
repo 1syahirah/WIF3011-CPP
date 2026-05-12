@@ -1,95 +1,74 @@
 import java.util.Stack;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class StackAccess {
     private final Stack<Integer> stack = new Stack<>();
     private final int CAPACITY = 3;
     
-    // Concurrency control tools
-    private final ReentrantLock lock = new ReentrantLock();
+    private final Lock lock = new ReentrantLock();
     private final Condition notFull = lock.newCondition();
     private final Condition notEmpty = lock.newCondition();
 
-    public void push(int item, String taskName) {
+    public void push(int value) {
         lock.lock();
         try {
-            // Wait while the stack is full
+            long waitTime = TimeUnit.SECONDS.toNanos(1);
             while (stack.size() == CAPACITY) {
-                System.out.println(taskName + " waiting. Stack is FULL.");
-                // Wait for 1 second. If it returns false, the timeout expired.
-                boolean signaled = notFull.await(1, TimeUnit.SECONDS);
-                if (!signaled) {
-                    System.out.println(taskName + " DISCARDED push (" + item + ") after 1 second wait.");
+                if (waitTime <= 0) {
+                    System.out.println(Thread.currentThread().getName() + " [DISCARD] Push operation for " + value + " discarded (Timeout). Stack is full.");
                     return;
                 }
+                waitTime = notFull.awaitNanos(waitTime);
             }
-            
-            // Critical Section
-            stack.push(item);
-            System.out.println(taskName + " PUSHED: " + item + " | Stack size: " + stack.size());
-            
-            // Signal any waiting consumers that the stack is no longer empty
-            notEmpty.signalAll();
-            
+            stack.push(value);
+            System.out.println(Thread.currentThread().getName() + " [PUSH] Pushed " + value + ". Stack size: " + stack.size());
+            notEmpty.signalAll(); // Notify readers/peekers that stack is not empty
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-        } finally {
-            lock.unlock(); // Always unlock in a finally block to prevent deadlocks
-        }
-    }
-
-    public Integer pop(String taskName) {
-        lock.lock();
-        try {
-            // Wait while the stack is empty
-            while (stack.isEmpty()) {
-                System.out.println(taskName + " waiting. Stack is EMPTY.");
-                boolean signaled = notEmpty.await(1, TimeUnit.SECONDS);
-                if (!signaled) {
-                    System.out.println(taskName + " DISCARDED pop after 1 second wait.");
-                    return null;
-                }
-            }
-            
-            // Critical Section
-            Integer item = stack.pop();
-            System.out.println(taskName + " POPPED: " + item + " | Stack size: " + stack.size());
-            
-            // Signal any waiting producers that the stack is no longer full
-            notFull.signalAll();
-            return item;
-            
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            return null;
         } finally {
             lock.unlock();
         }
     }
 
-    public Integer peek(String taskName) {
+    public void pop() {
         lock.lock();
         try {
-            // We apply the same 1-second wait logic to peek so it doesn't instantly fail
+            long waitTime = TimeUnit.SECONDS.toNanos(1);
             while (stack.isEmpty()) {
-                System.out.println(taskName + " waiting to peek. Stack is EMPTY.");
-                boolean signaled = notEmpty.await(1, TimeUnit.SECONDS);
-                if (!signaled) {
-                    System.out.println(taskName + " DISCARDED peek after 1 second wait.");
-                    return null;
+                if (waitTime <= 0) {
+                    System.out.println(Thread.currentThread().getName() + " [DISCARD] Pop operation discarded (Timeout). Stack is empty.");
+                    return;
                 }
+                waitTime = notEmpty.awaitNanos(waitTime);
             }
-            
-            // Critical Section (Retrieve without delete)
-            Integer item = stack.peek();
-            System.out.println(taskName + " PEEKED: " + item + " | Stack size: " + stack.size());
-            return item;
-            
+            int value = stack.pop();
+            System.out.println(Thread.currentThread().getName() + " [POP] Popped " + value + ". Stack size: " + stack.size());
+            notFull.signalAll(); // Notify writers that stack is not full
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            return null;
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    public void peek() {
+        lock.lock();
+        try {
+            long waitTime = TimeUnit.SECONDS.toNanos(1);
+            while (stack.isEmpty()) {
+                if (waitTime <= 0) {
+                    System.out.println(Thread.currentThread().getName() + " [DISCARD] Peek operation discarded (Timeout). Stack is empty.");
+                    return;
+                }
+                waitTime = notEmpty.awaitNanos(waitTime);
+            }
+            int value = stack.peek();
+            System.out.println(Thread.currentThread().getName() + " [PEEK] Peeked " + value + ". Stack size: " + stack.size());
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
         } finally {
             lock.unlock();
         }

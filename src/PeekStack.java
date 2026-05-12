@@ -1,5 +1,5 @@
-public class PeekStack implements Runnable{
-    private StackAccess stackAccess;
+public class PeekStack implements Runnable {
+    private final StackAccess stackAccess;
 
     public PeekStack(StackAccess stackAccess) {
         this.stackAccess = stackAccess;
@@ -7,10 +7,13 @@ public class PeekStack implements Runnable{
 
     @Override
     public void run() {
-        String name = Thread.currentThread().getName() + " (Peek)";
         for (int i = 0; i < 4; i++) {
-            stackAccess.peek(name);
-            try { Thread.sleep(20); } catch (InterruptedException e) {}
+            stackAccess.peek();
+            try {
+                Thread.sleep(20);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
         }
     }
 }

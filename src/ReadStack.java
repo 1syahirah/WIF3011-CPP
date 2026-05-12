@@ -1,5 +1,5 @@
 public class ReadStack implements Runnable {
-    private StackAccess stackAccess;
+    private final StackAccess stackAccess;
 
     public ReadStack(StackAccess stackAccess) {
         this.stackAccess = stackAccess;
@@ -7,10 +7,13 @@ public class ReadStack implements Runnable {
 
     @Override
     public void run() {
-        String name = Thread.currentThread().getName() + " (Read)";
         for (int i = 0; i < 4; i++) {
-            stackAccess.pop(name);
-            try { Thread.sleep(20); } catch (InterruptedException e) {}
+            stackAccess.pop();
+            try {
+                Thread.sleep(20);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
         }
     }
 }

@@ -1,0 +1,33 @@
+# --- Compiled Java files ---
+*.class
+*.jar
+*.war
+*.ear
+
+# --- Build Folders ---
+# Common for manual builds or simple structures
+bin/
+out/
+target/
+
+# --- IDE Specific Files ---
+# IntelliJ IDEA
+.idea/
+*.iml
+*.iws
+
+# Eclipse
+.metadata/
+.classpath
+.project
+.settings/
+
+# VS Code
+.vscode/
+
+# --- Operating System Files ---
+.DS_Store
+Thumbs.db
+
+# --- Log Files ---
+*.log

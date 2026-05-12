@@ -4,44 +4,58 @@ import java.util.concurrent.TimeUnit;
 
 public class Main  {
     public static void main(String[] args) throws Exception {
-    System.out.println("Starting Concurrency Tests...\n");
+    System.out.println("=== Starting StackAccess Tests ===");
 
-        runScenario("1. Only Push Task", new WriteStack(new StackAccess()));
+        // 1. Only push task
+        runScenario("Only Push", new WriteStack(new StackAccess()));
         
+        // 2. Only pop task
+        runScenario("Only Pop", new ReadStack(new StackAccess()));
+
+        // 3. Only peek task
+        runScenario("Only Peek", new PeekStack(new StackAccess()));
+
+        // 4. Two types: Push & Pop
+        StackAccess sa1 = new StackAccess();
+        runScenario("Push & Pop", new WriteStack(sa1), new ReadStack(sa1));
+
+        // 5. Two types: Push & Peek
         StackAccess sa2 = new StackAccess();
-        runScenario("2. Push & Pop Tasks", new WriteStack(sa2), new ReadStack(sa2));
-        
+        runScenario("Push & Peek", new WriteStack(sa2), new PeekStack(sa2));
+
+        // 6. Two types: Pop & Peek
         StackAccess sa3 = new StackAccess();
-        runScenario("3. Push & Peek Tasks", new WriteStack(sa3), new PeekStack(sa3));
-        
+        runScenario("Pop & Peek", new ReadStack(sa3), new PeekStack(sa3));
+
+        // 7. Three types: Push, Pop, Peek
         StackAccess sa4 = new StackAccess();
-        runScenario("4. All Three Types of Tasks", new WriteStack(sa4), new ReadStack(sa4), new PeekStack(sa4));
-        
+        runScenario("Push, Pop & Peek", new WriteStack(sa4), new ReadStack(sa4), new PeekStack(sa4));
+
+        // 8. Produce more than consumed (2 Writers, 1 Reader)
         StackAccess sa5 = new StackAccess();
-        runScenario("5. Produce MORE than Consumed (2 Writes, 1 Read)", 
-                new WriteStack(sa5), new WriteStack(sa5), new ReadStack(sa5));
-        
+        runScenario("Produce > Consume", new WriteStack(sa5), new WriteStack(sa5), new ReadStack(sa5));
+
+        // 9. Consume more than produced (1 Writer, 2 Readers)
         StackAccess sa6 = new StackAccess();
-        runScenario("6. Consume MORE than Produced (1 Write, 2 Reads)", 
-                new WriteStack(sa6), new ReadStack(sa6), new ReadStack(sa6));
+        runScenario("Consume > Produce", new WriteStack(sa6), new ReadStack(sa6), new ReadStack(sa6));
     }
 
-    // Helper method to isolate and cleanly test each scenario using a Thread Pool of size 3
+    /**
+     * Helper method to initialize a thread pool, run a specific scenario, and wait for its completion
+     * before moving on to the next scenario. This keeps console output organized.
+     */
     private static void runScenario(String scenarioName, Runnable... tasks) throws InterruptedException {
-        System.out.println("======================================================");
-        System.out.println("SCENARIO: " + scenarioName);
-        System.out.println("======================================================");
+        System.out.println("\n--- Scenario: " + scenarioName + " ---");
         
-        // Ensure a thread pool of exactly 3 is used
-        ExecutorService threadPool = Executors.newFixedThreadPool(3);
+        // Thread pool of 3 as requested
+        ExecutorService executor = Executors.newFixedThreadPool(3);
         
         for (Runnable task : tasks) {
-            threadPool.execute(task);
+            executor.execute(task);
         }
         
-        // Shut down pool and wait for all tasks (and timeouts) to finish before moving to the next test
-        threadPool.shutdown();
-        threadPool.awaitTermination(5, TimeUnit.SECONDS);
-        System.out.println("\n");
+        // Initiate orderly shutdown and wait for tasks to finish (or timeout after 5 seconds)
+        executor.shutdown();
+        executor.awaitTermination(5, TimeUnit.SECONDS);
     }
 }
