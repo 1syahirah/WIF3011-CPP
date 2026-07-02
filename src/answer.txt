@@ -1,0 +1,15 @@
+Why wait(), notify(), and notifyAll() are in the Object class:
+
+- In Java, every single object automatically comes with its own built-in lock (called a "monitor"). Any object — not just special "Lock" objects — can be used to control access between threads.
+
+- wait(), notify(), and notifyAll() work directly with that lock. They need to know exactly which object's lock is being paused, released, or signaled.
+
+- Since the lock belongs to the object (not the thread), these methods must also belong to the object. A thread doesn't "own" a lock — it just borrows it temporarily.
+
+- If these methods were placed in the Thread class instead, there would be no clear way to say which object's lock a thread is waiting on — since one thread can interact with many different locks over its lifetime.
+
+- The real purpose of wait()/notify() is to let multiple threads coordinate through a shared object (for example, one thread waiting for another to finish preparing some data). The object is the shared meeting point, so it makes sense for the coordination methods to live there.
+
+- Because every class in Java automatically inherits from Object, this design guarantees that any object can be used for thread coordination — no extra setup required.
+
+- Side note for discussion: many developers consider this a slightly awkward design in hindsight, since it means every object carries locking ability whether it's ever used or not. This is part of why Java later introduced java.util.concurrent with clearer, more flexible alternatives like Lock and Condition.
